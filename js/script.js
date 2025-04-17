@@ -20,8 +20,8 @@ const create_weather_card = (City_name, weather_item, index) => {
 
 `
     }
-         else {
-                return `<li class="card">
+    else {
+        return `<li class="card">
                 <h2>(${weather_item.dt_txt.split(" ")[0]})</h2>
                 <img src="https://openweathermap.org/img/wn/${weather_item.weather[0].icon}@2x.png" alt="weather-icon">
                 <h4>Temp: ${(weather_item.main.temp - 273.15).toFixed(2)}° C,</h4>
@@ -59,7 +59,7 @@ const weather_details = (City_name, lat, lon) => {
             current_weather.innerHTML = "";
             weather_cards.innerHTML = "";
 
-        
+
             //  this code denotes dom manipulation create forecast card or current weather card 
             five_days_data.forEach((weather_item, index) => {
                 if (index === 0) {
@@ -77,23 +77,29 @@ const weather_details = (City_name, lat, lon) => {
         });
 }
 
- // this funcation find city name 
+// this funcation find city name 
 
 const get_city = async () => {
+    if (city_input.value.trim() === "") {
+        alert("Please enter a city name");
+        return;
+    }
     const find_city = city_input.value.trim();
     if (!find_city) return;
     const location_api = `http://api.openweathermap.org/geo/1.0/direct?q=${find_city}&limit=1&appid=${API_KEY}`
 
     city_input.value = "";
+
     fetch(location_api)
         .then(function (res) {
             return res.json();
         })
         .then(function (data) {
-            if (!data.length){
-                alert(`Sorry, location "${find_city}" not found. Please enter a valid city name.`);
-             return;}
-          
+            if (!data.length) {
+                alert(`${find_city}location not found. Please enter a valid city name.`);
+                return;
+            }
+
             const { name, lat, lon } = data[0]
             weather_details(name, lat, lon)
             // console.log(data);
@@ -101,7 +107,7 @@ const get_city = async () => {
         .catch(function (error) {
             console.log("Error fetching data:", error);
         });
-            // console.log(location_api);
+    // console.log(location_api);
 }
 
 
@@ -110,32 +116,32 @@ const get_city = async () => {
 const get_current_location = () => {
     navigator.geolocation.getCurrentPosition(
         position => {
-            console.log(position);
-
             const { latitude, longitude } = position.coords;
-            const reverse_url = `http://api.openweathermap.org/geo/1.0/reverse?lat=${latitude}&lon=${longitude}&limit=1&appid=${API_KEY}`;
+           
+            const reverse_url = `https://api.openweathermap.org/geo/1.0/reverse?lat=${latitude}&lon=${longitude}&limit=1&appid=${API_KEY}`;
 
             fetch(reverse_url)
                 .then(function (res) {
                     return res.json();
                 })
                 .then(function (data) {
-                    const { name } = data[0]
-                    weather_details(name, latitude, longitude)
-
+                    const { name } = data[0];
+                    weather_details(name, latitude, longitude);
                 })
                 .catch(function (error) {
                     console.log("Error fetching data:", error);
                 });
-        }),
-
+        },
         error => {
             console.error(error);
-            if (error.code === error.PERMISSION_DENIDE) {
-                alert("allow loction")
+            if (error.code === error.PERMISSION_DENIED) {
+                alert("Please allow location access.");
             }
+
         }
-}
+    );
+};
+
 
 
 
